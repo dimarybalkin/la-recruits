@@ -584,7 +584,7 @@ var MSGS=[
 "«Техничка» — обучение в закрепе, анонсы лекций, любые вопросы.\n\n"+
 "Прочитай закрепы в обоих. Вопросы можно и мне напрямую.\n\n"+
 "Ближайшая новичковая: {новичковая_дата}, суббота 12:00, РИНХ. Нужны паспорт и запись — скажи, если придёшь, внесу в список.\n\n"+
-"Выезжать можно уже сейчас, лекция не обязательна.",
+"Выезжать на поиски можно уже сейчас, лекция не обязательна.",
   note:'Короткое и по делу. Текст про публичность — следующим сообщением, чтобы не смешивать «что делать» и «как себя вести».'},
 
  {t:'Как откликаться на поиск', n:'после добавления в рабочку', text:
@@ -784,10 +784,10 @@ function renderMsg(host, items){
     head.append(el('div','mn',String(i+1)));
     head.append(el('div','','<b>'+esc(m.t)+'</b><span>'+esc(m.n)+'</span>'));
     var b=el('button','mbtn','Копировать'); b.type='button';
-    b.addEventListener('click',function(){ copy(m.text, b); });
+    b.addEventListener('click',function(){ copy(fill(m.text), b); });
     head.append(b);
     card.append(head);
-    var body=el('div','mt', slots(esc(m.text)));
+    var body=el('div','mt', slots(fill(esc(m.text))));
     card.append(body);
     if(m.note) card.append(el('div','note', esc(m.note)));
     box.append(card);
