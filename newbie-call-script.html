@@ -176,6 +176,11 @@ ul.pts li.no::before{background:var(--warn);border-radius:1px}
 .self .si{color:var(--fg);padding:6px 0;font-size:14.5px;font-weight:500;line-height:1.35}
 .self .si+.si{border-top:1px dotted var(--line)}
 .self .si small{display:block;font-size:12px;font-weight:400;color:var(--mute);margin-top:2px}
+.self .cp{font:inherit;color:var(--river);background:none;border:0;padding:0;cursor:pointer;
+  border-bottom:1px dashed currentColor}
+.self .cp:hover{border-bottom-style:solid}
+:root[data-theme="dark"] .self .cp{color:#7FB6D4}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .self .cp{color:#7FB6D4} }
 @media (max-width:620px){ .self,.msgs .self{margin-left:0} }
 
 footer{border-top:1px solid var(--line);padding-block:22px 40px;color:var(--mute);font-size:12.5px}
@@ -607,7 +612,7 @@ var MSGS=[
   self:[
     {t:'Добавил претендента в чат «Настройка»'},
     {t:'Проверил, что претендент всё верно туда написал'},
-    {t:'Написал в админке «@Shulgovna Позывной настроен»'},
+    {t:'Написал в админке', c:'@Shulgovna Позывной настроен'},
     {t:'Удалил претендента из «Настройки»'}
   ]},
 
@@ -791,7 +796,14 @@ function renderSelf(items){
   var box=el('div','self');
   box.append(el('div','sk','Самопроверка'));
   items.forEach(function(it){
-    box.append(el('div','si',esc(it.t)+(it.h?'<small>'+esc(it.h)+'</small>':'')));
+    var si=el('div','si',esc(it.t)+(it.h?'<small>'+esc(it.h)+'</small>':''));
+    if(it.c){
+      var cp=el('button','cp',esc(it.c)); cp.type='button'; cp.title='Скопировать';
+      cp.addEventListener('click',function(){ copy(it.c); });
+      si.insertBefore(document.createTextNode(' '), si.querySelector('small'));
+      si.insertBefore(cp, si.querySelector('small'));
+    }
+    box.append(si);
   });
   return box;
 }
