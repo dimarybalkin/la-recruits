@@ -59,6 +59,7 @@ header p.lede{color:#BCCFC2;margin-top:14px;max-width:58ch;font-size:15px}
   padding:6px 13px;font:500 13px var(--ff-b);cursor:pointer;transition:.18s;white-space:nowrap}
 .chip:hover{border-color:var(--fg)}
 .chip[aria-pressed="true"]{background:var(--pine);border-color:var(--pine);color:#fff}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .chip[aria-pressed="true"]{background:var(--pine2);border-color:var(--pine2);color:#0D1C18} }
 :root[data-theme="dark"] .chip[aria-pressed="true"]{background:var(--pine2);border-color:var(--pine2);color:#0D1C18}
 .chip:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
 
