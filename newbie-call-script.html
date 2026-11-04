@@ -165,6 +165,19 @@ ul.pts li.no::before{background:var(--warn);border-radius:1px}
 .callout p{font-size:14px;color:#C2D2C6;line-height:1.5}
 :root[data-theme="dark"] .callout p{color:var(--mute)}
 
+/* Самопроверка интервьюера: без подложки, пунктир, не для чтения вслух */
+:root{--selfc:#A07A12}
+:root[data-theme="dark"]{--selfc:#D9B24A}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){--selfc:#D9B24A} }
+.self{margin:-2px 0 12px 42px;border:1.5px dashed var(--selfc);border-radius:14px;padding:11px 14px 8px;background:transparent}
+.msgs .self{margin:0 0 0 42px}
+.self .sk{font-family:var(--ff-d);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--selfc);
+  display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.self .si{color:var(--fg);padding:6px 0;font-size:14.5px;font-weight:500;line-height:1.35}
+.self .si+.si{border-top:1px dotted var(--line)}
+.self .si small{display:block;font-size:12px;font-weight:400;color:var(--mute);margin-top:2px}
+@media (max-width:620px){ .self,.msgs .self{margin-left:0} }
+
 footer{border-top:1px solid var(--line);padding-block:22px 40px;color:var(--mute);font-size:12.5px}
 .toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,16px);background:var(--pine);color:#fff;
   padding:9px 16px;border-radius:999px;font-size:13px;opacity:0;pointer-events:none;transition:.22s;z-index:60}
@@ -590,7 +603,13 @@ var MSGS=[
 "2. Два скриншота\n"+
 "3. Сообщение о готовности\n\n"+
 "Проверю и добавлю в рабочие чаты. Из «Настройки» затем удалю.",
-  note:'Добавляем в чат одновременно с этим сообщением.'},
+  note:'Добавляем в чат одновременно с этим сообщением.',
+  self:[
+    {t:'Добавил претендента в чат «Настройка»'},
+    {t:'Проверил, что претендент всё верно туда написал'},
+    {t:'Написал в админке «@Shulgovna Позывной настроен»'},
+    {t:'Удалил претендента из «Настройки»'}
+  ]},
 
  {t:'Приветствие', n:'после проверки данных', text:
 "Ты принят. Добро пожаловать в ЛизуАлерт.\n\n"+
@@ -598,12 +617,14 @@ var MSGS=[
 "Второе: теперь ты часть отряда, и по тебе судят обо всех нас. Личную жизнь никто не контролирует, и твои страницы не обязаны быть официальными. Но не связывай с отрядом откровенные фото, агрессию, кадры с пьянок. Прежде чем поставить атрибутику или назвать себя добровольцем — посмотри на свою страницу глазами человека, который о тебе ничего не знает.\n\n"+
 "В комментариях под постами о поиске не спорим и ничего никому не доказываем. Направления Диванных войск у нас нет.\n\n"+
 "Часто задаваемые вопросы: https://dimarybalkin.github.io/la-recruits/newbie-faq\n"+
-"Что взять на первый поиск: https://lizaalert.org/dvizhenie/vash-pervyj-poisk/\n"+
-"Направления отряда: https://lizaalert.org/napravleniya-otryada-lizaalert-prisoedinyajsya/\n"+
+"Что взять на первый поиск: https://lizaalert.org/dvizhenie/vash-pervyj-poisk\n"+
+"Направления отряда: https://lizaalert.org/napravleniya-otryada-lizaalert-prisoedinyajsya\n"+
 "Анонсы: https://t.me/LizaAlertRostov и https://vk.ru/lizaalert_rostov\n\n"+
-"Резервный чат в ВК на случай проблем со связью, ссылку никому не передавай: https://vk.me/join/Y8tDBmME3rkOD71cmXFvAUyQbBewW_74rG8=\n\n"+
 "Хороших поисков!",
-  note:''},
+  note:'',
+  self:[
+    {t:'Добавил претендента в рабочку и техничку'}
+  ]},
 
  {t:'Рабочка и техничка', n:'', text:
 "Добавил тебя в два чата.\n\n"+
@@ -612,7 +633,8 @@ var MSGS=[
 "Прочитай закрепы в обоих.\n\n"+
 "Можешь задавать мне любые вопросы. Всегда с удовольствием помогу и подскажу. Обратиться за советом не зазорно, даже если это совет по банальным вещам. Многие вещи в отряде для новичков совсем неочевидны.\n\n"+
 "Ближайшая новичковая лекция: {новичковая_дата}, {новичковая_время}, РИНХ. Если пойдёшь — нужно зарегистрироваться заранее и взять с собой паспорт. Регистрация откроется примерно за неделю до лекции, время и дата может незначительно измениться. Сообщение о регистрации будет в каналах ЛизыАлерт Ростовской области и в «Техничке».\n\n"+
-"Выезжать на поиски можно уже сейчас, лекция не обязательна.",
+"Выезжать на поиски можно уже сейчас, лекция не обязательна.\n\n"+
+"Резервный чат в ВК на случай проблем со связью, ссылку никому не передавай: https://vk.me/join/Y8tDBmME3rkOD71cmXFvAUyQbBewW_74rG8=",
   note:''},
 
  {t:'Как откликаться на поиск', n:'', text:
@@ -645,7 +667,11 @@ var MSGS=[
 "Если когда-нибудь решишь его скрыть, добавь рабочку в исключения:\n"+
 "Настройки → Конфиденциальность → Номер телефона → Добавить исключения → «РАБОЧКА ЛА Ростовская».\n\n"+
 "Для остальных номер будет скрыт.",
-  note:''},
+  note:'',
+  self:[
+    {t:'Отправил памятку «Глоссарий поисковика»'},
+    {t:'Отправил памятку по GuruMaps'}
+  ]},
 
  {t:'Обратная связь', n:'ответы складывайте в таблицу', text:
 "Что было сложного или непонятного в регистрации? Что бы изменил, чтобы следующим было проще?",
@@ -761,6 +787,15 @@ var OUTS=[
 /* ---------- рендер ---------- */
 var CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
 
+function renderSelf(items){
+  var box=el('div','self');
+  box.append(el('div','sk','Самопроверка'));
+  items.forEach(function(it){
+    box.append(el('div','si',esc(it.t)+(it.h?'<small>'+esc(it.h)+'</small>':'')));
+  });
+  return box;
+}
+
 function renderSteps(list, host, prefix){
   var box=$(host);
   list.forEach(function(st,i){
@@ -791,6 +826,7 @@ function renderSteps(list, host, prefix){
       upd();
     });
     box.append(card);
+    if(st.self) box.append(renderSelf(st.self));
   });
 }
 renderSteps(FIRST,'#stepsFirst','');
@@ -811,6 +847,7 @@ function renderMsg(host, items){
     card.append(body);
     if(m.note) card.append(el('div','note', esc(m.note)));
     box.append(card);
+    if(m.self) box.append(renderSelf(m.self));
   });
 }
 renderMsg('#msgList', MSGS);
@@ -818,9 +855,10 @@ renderMsg('#rulesMsg', [{t:'Правила поведения в отряде', 
   note:'Просим прочитать и сказать, с чем не согласен. Молчаливое несогласие проявится на поиске, в худший момент.'}]);
 
 function upd(){
-  var all=document.querySelectorAll('.step'), done=document.querySelectorAll('.step.done').length;
-  $('#cnt').textContent=done+' из '+all.length;
-  $('#trk').style.width=(all.length? done/all.length*100 : 0)+'%';
+  var all=document.querySelectorAll('.step').length,
+      done=document.querySelectorAll('.step.done').length;
+  $('#cnt').textContent=done+' из '+all;
+  $('#trk').style.width=(all? done/all*100 : 0)+'%';
 }
 upd();
 
