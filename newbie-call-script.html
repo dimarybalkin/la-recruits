@@ -51,17 +51,8 @@ header p.lede{color:#BCCFC2;margin-top:12px;max-width:58ch;font-size:15px}
 .dates span{display:block;font-size:11px;color:#BCCFC2;margin-top:5px;line-height:1.3}
 
 .bar{position:sticky;top:0;z-index:30;background:var(--bg);border-bottom:1px solid var(--line);padding-block:10px}
-.barin{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.track{flex:1;min-width:120px;height:7px;background:var(--soft);border-radius:4px;overflow:hidden}
-.track i{display:block;height:100%;width:0;background:var(--signal);border-radius:4px;transition:width .35s cubic-bezier(.22,.9,.3,1)}
-.cnt{font-family:var(--ff-d);font-weight:600;font-size:13px;white-space:nowrap}
 button{font:inherit;cursor:pointer}
-.btn{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;
-  padding:7px 15px;font-size:13px;font-weight:500;transition:.18s}
-.btn:hover{border-color:var(--fg)}
-.btn:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
-.btn.primary{background:var(--signal);border-color:var(--signal);color:#fff}
-.navchips{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.navchips{display:flex;gap:6px;flex-wrap:wrap}
 .navchips a{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;
   font-size:12.5px;text-decoration:none;color:var(--fg);transition:.18s;white-space:nowrap}
 .navchips a:hover{border-color:var(--signal);color:var(--signal)}
@@ -76,17 +67,9 @@ h2{font-size:clamp(20px,3vw,28px);margin-bottom:8px}
 
 .step{background:var(--surface);border:1px solid var(--line);border-radius:14px;
   padding:clamp(14px,2.2vw,19px);margin-bottom:10px;transition:border-color .2s}
-.step.done{border-color:var(--pine2);background:color-mix(in srgb, var(--pine2) 5%, var(--surface))}
-.sh{display:grid;grid-template-columns:30px minmax(0,1fr);gap:12px;align-items:start}
-.tick{width:26px;height:26px;border-radius:8px;border:2px solid var(--line);background:transparent;
-  display:grid;place-items:center;padding:0;transition:.18s;flex:none}
-.tick svg{width:14px;height:14px;opacity:0;transition:opacity .18s}
-.step.done .tick{background:var(--pine2);border-color:var(--pine2)}
-.step.done .tick svg{opacity:1}
 .sh h3{font-size:15.5px}
 .sh .meta{font-size:12px;color:var(--mute);margin-top:4px}
-.sbody{margin-top:13px;padding-left:42px}
-@media (max-width:620px){ .sbody{padding-left:0} }
+.sbody{margin-top:13px}
 
 .say{background:var(--soft);border-left:3px solid var(--pine2);border-radius:0 10px 10px 0;
   padding:12px 15px;margin:9px 0;font-size:clamp(14.5px,1.8vw,16px);line-height:1.45;position:relative}
@@ -202,11 +185,6 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;color:var(--mute
 </header>
 
 <div class="bar"><div class="wrap">
-  <div class="barin">
-    <span class="cnt" id="cnt">0 из 0</span>
-    <span class="track"><i id="trk"></i></span>
-    <button class="btn primary" id="reset">Новый человек</button>
-  </div>
   <div class="navchips">
     <a href="#objs">Возражения</a>
     <a href="#prep">Перед звонком</a>
@@ -491,8 +469,8 @@ var TALK=[
   pts:['Если человек растерялся — подскажите, что подойдёт почти что угодно: прозвище, место рождения, профессия, название животных, растений или природных явлений.']},
 
  {t:'Назначить вечер регистрации', m:'самое важное решение в разговоре',
-  say:[['договариваемся','Дальше тебе нужно будет зарегистрироваться. Регистрация занимает около сорока минут и проходится за один вечер. Давай назначим конкретный вечер, когда тебя ничего не будет отвлекать. Я в это время буду на связи, и проведу тебя по шагам регистрации. Когда у тебя будет время? Можем {сегодня во столько-то}, или {завтра во столько-то}'],
-       ['если регистрация сегодня','Тогда позывной тебе нужно будет придумать и утвердить до этого момента. Не затягивай, без позывного регистрироваться не получится.']],
+  say:[['договариваемся','Дальше тебе нужно будет зарегистрироваться. Регистрация занимает около сорока минут. Предлагаю выбрать время, чтобы и ты была свободна, и я был на связи. Когда ты бываешь свободна?'],
+       ['если регистрация сегодня','Тогда позывной тебе нужно будет придумать и утвердить до этого момента. Не затягивай, потому что без позывного регистрироваться не получится.']],
   pts:[],
   why:'Те же самые шаги, пройденные за один вечер и растянутые на неделю, дают совершенно разный результат. Паузы между «человек сделал» и «прозвонщик заметил» — главная причина, по которой люди остывают на полпути.'},
 
@@ -622,9 +600,8 @@ var MSGS=[
 "Второе: теперь ты часть отряда, и по тебе судят обо всех нас. Личную жизнь никто не контролирует, и твои страницы не обязаны быть официальными. Но не связывай с отрядом откровенные фото, агрессию, кадры с пьянок. Прежде чем поставить атрибутику или назвать себя добровольцем — посмотри на свою страницу глазами человека, который о тебе ничего не знает.\n\n"+
 "В комментариях под постами о поиске не спорим и ничего никому не доказываем. Направления Диванных войск у нас нет.\n\n"+
 "Часто задаваемые вопросы: https://dimarybalkin.github.io/la-recruits/newbie-faq\n"+
-"Что взять на первый поиск: https://lizaalert.org/dvizhenie/vash-pervyj-poisk\n"+
 "Направления отряда: https://lizaalert.org/napravleniya-otryada-lizaalert-prisoedinyajsya\n"+
-"Анонсы: https://t.me/LizaAlertRostov и https://vk.ru/lizaalert_rostov\n\n"+
+"Каналы «ЛизаАлерт» Ростовской области: https://t.me/LizaAlertRostov и https://vk.ru/lizaalert_rostov\n\n"+
 "Хороших поисков!",
   note:'',
   self:[
@@ -791,8 +768,6 @@ var OUTS=[
 ];
 
 /* ---------- рендер ---------- */
-var CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
-
 function renderSelf(items){
   var box=el('div','self');
   box.append(el('div','sk','Самопроверка'));
@@ -813,12 +788,7 @@ function renderSteps(list, host, prefix){
   var box=$(host);
   list.forEach(function(st,i){
     var card=el('div','step');
-    var head=el('div','sh');
-    var btn=el('button','tick',CHECK);
-    btn.type='button'; btn.setAttribute('aria-pressed','false');
-    btn.setAttribute('aria-label','Отметить выполненным: '+st.t);
-    head.append(btn);
-    head.append(el('div','','<h3>'+prefix+(i+1)+'. '+esc(st.t)+'</h3>'+(st.m?'<div class="meta">'+esc(st.m)+'</div>':'')));
+    var head=el('div','sh','<h3>'+prefix+(i+1)+'. '+esc(st.t)+'</h3>'+(st.m?'<div class="meta">'+esc(st.m)+'</div>':''));
     card.append(head);
     var body=el('div','sbody');
     st.say.forEach(function(s){
@@ -833,11 +803,6 @@ function renderSteps(list, host, prefix){
     body.append(ul);
     if(st.why) body.append(el('div','why','<b>Зачем:</b> '+esc(st.why)));
     card.append(body);
-    btn.addEventListener('click',function(){
-      var on=card.classList.toggle('done');
-      btn.setAttribute('aria-pressed', on?'true':'false');
-      upd();
-    });
     box.append(card);
     if(st.self) box.append(renderSelf(st.self));
   });
@@ -866,26 +831,6 @@ function renderMsg(host, items){
 renderMsg('#msgList', MSGS);
 renderMsg('#rulesMsg', [{t:'Правила поведения в отряде', n:'отправляем сразу после собеседования', text:RULES_TEXT,
   note:'Просим прочитать и сказать, с чем не согласен. Молчаливое несогласие проявится на поиске, в худший момент.'}]);
-
-function upd(){
-  var all=document.querySelectorAll('.step').length,
-      done=document.querySelectorAll('.step.done').length;
-  $('#cnt').textContent=done+' из '+all;
-  $('#trk').style.width=(all? done/all*100 : 0)+'%';
-}
-upd();
-
-$('#reset').addEventListener('click',function(){
-  document.querySelectorAll('.step.done').forEach(function(c){
-    c.classList.remove('done');
-    var t=c.querySelector('.tick'); if(t) t.setAttribute('aria-pressed','false');
-  });
-  document.querySelectorAll('.out').forEach(function(b){ b.setAttribute('aria-pressed','false'); });
-  var ob=$('#outbox'); ob.className='empty';
-  ob.textContent='Выберите исход, и здесь появится, что записать и когда вернуться к человеку.';
-  upd();
-  window.scrollTo({top:0, behavior:'smooth'});
-});
 
 (function(){
   var box=$('#objsBox');
