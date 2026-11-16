@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Скрипт прозвона новичков</title>
+<script>
+/* Пол соискателя ставим до отрисовки, чтобы при загрузке не мигали тексты. */
+(function(){ try{ document.documentElement.setAttribute('data-gender', localStorage.getItem('la-gender')==='f'?'f':'m'); }catch(e){ document.documentElement.setAttribute('data-gender','m'); } })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Golos+Text:wght@400;500;600;700&display=swap">
@@ -56,6 +60,15 @@ button{font:inherit;cursor:pointer}
 .navchips a{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;
   font-size:12.5px;text-decoration:none;color:var(--fg);transition:.18s;white-space:nowrap}
 .navchips a:hover{border-color:var(--signal);color:var(--signal)}
+.bar .wrap{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap}
+.gswitch{display:flex;align-items:center;gap:2px;background:var(--surface);border:1px solid var(--line);
+  border-radius:999px;padding:3px;flex-shrink:0;margin-left:auto}
+.gswitch i{font-style:normal;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--mute);padding:0 8px}
+.gbtn{font:inherit;font-size:12.5px;border:0;background:none;color:var(--mute);padding:4px 12px;border-radius:999px;
+  transition:.18s;white-space:nowrap;line-height:1.3}
+.gbtn:hover{color:var(--signal)}
+.gbtn[aria-pressed="true"]{background:var(--fg);color:var(--bg);font-weight:600}
+@media (max-width:560px){ .gswitch i{display:none} .gbtn{padding:4px 10px} }
 
 main{padding-block:clamp(22px,3.5vw,34px) 60px}
 section{margin-bottom:clamp(26px,4vw,44px);scroll-margin-top:96px}
@@ -195,6 +208,11 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;color:var(--mute
     <a href="#video">Видео</a>
     <a href="#out">Исход</a>
   </div>
+  <div class="gswitch" role="group" aria-label="Как обращаться к соискателю">
+    <i>Обращение</i>
+    <button type="button" class="gbtn" data-g="m" aria-pressed="false" title="Показывать варианты для мужчины">Мужчине</button>
+    <button type="button" class="gbtn" data-g="f" aria-pressed="false" title="Показывать варианты для женщины">Женщине</button>
+  </div>
 </div></div>
 
 <main class="wrap">
@@ -306,6 +324,63 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;color:var(--mute
 var $=function(s,r){return (r||document).querySelector(s);};
 function el(t,c,h){var n=document.createElement(t); if(c)n.className=c; if(h!=null)n.innerHTML=h; return n;}
 function esc(t){ return String(t).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+
+/* ---------- обращение: мужской или женский пол ----------
+   В любом тексте (в массивах ниже, в статичном HTML, в сообщениях) можно писать
+   токен [[м:мужской вариант|ж:женский вариант]] — на странице и при копировании
+   останется только вариант выбранного пола. Пример:
+     «Ты [[м:принят|ж:принята]] в отряд».
+   Внутри варианта не должно быть символа «|», и токен должен целиком лежать
+   в одном текстовом узле — не разрывайте его HTML-тегами. */
+var GTOKEN=/\[\[\s*([мж])\s*:\s*([\s\S]*?)\s*\|\s*([мж])\s*:\s*([\s\S]*?)\s*\]\]/gi;
+function getGender(){
+  return document.documentElement.getAttribute('data-gender')==='f' ? 'f' : 'm';
+}
+function resolveG(text){
+  var s = text==null ? '' : String(text);
+  if(s.indexOf('[[')===-1) return s;
+  var want = getGender()==='f' ? 'ж' : 'м';
+  return s.replace(GTOKEN, function(_, g1, v1, g2, v2){
+    return (g1.toLowerCase()===want ? v1 : v2);
+  });
+}
+function paintGender(root){
+  root = root || document.body;
+  var walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {acceptNode:function(node){
+    var p = node.parentNode;
+    if(!p || (p.closest && p.closest('script,style'))) return NodeFilter.FILTER_REJECT;
+    return NodeFilter.FILTER_ACCEPT;
+  }});
+  var nodes = [], node;
+  while((node = walk.nextNode())) nodes.push(node);
+  nodes.forEach(function(n){
+    if(n.__gRaw == null){
+      if(n.nodeValue.indexOf('[[')===-1) return;
+      n.__gRaw = n.nodeValue;
+    }
+    var v = resolveG(n.__gRaw);
+    if(n.nodeValue !== v) n.nodeValue = v;
+  });
+  var ATTRS = ['title','placeholder','aria-label','alt'];
+  root.querySelectorAll('[title],[placeholder],[aria-label],[alt]').forEach(function(elm){
+    ATTRS.forEach(function(a){
+      var v = elm.getAttribute(a);
+      if(v==null || v.indexOf('[[')===-1) return;
+      if(!elm.__gAttr) elm.__gAttr = {};
+      if(elm.__gAttr[a] == null) elm.__gAttr[a] = v;
+      elm.setAttribute(a, resolveG(elm.__gAttr[a]));
+    });
+  });
+}
+function setGender(g, save){
+  g = (g==='f') ? 'f' : 'm';
+  document.documentElement.setAttribute('data-gender', g);
+  if(save !== false){ try{ localStorage.setItem('la-gender', g); }catch(e){} }
+  document.querySelectorAll('.gbtn').forEach(function(b){
+    b.setAttribute('aria-pressed', b.getAttribute('data-g')===g ? 'true' : 'false');
+  });
+  paintGender(document.body);
+}
 
 /* ---------- даты сезона ---------- */
 var EVENTS=[
@@ -471,14 +546,14 @@ var TALK=[
 
  {t:'Вопросы и отправка правил', m:'конец разговора',
   say:[['спрашиваем','Есть какие-то вопросы?'],
-       ['дальше','Сейчас пришлю тебе правила поведения в отряде. Нужно прочитать и сказать, согласен ты с ними или нет. Если нет, то с чем конкретно.']],
+       ['дальше','Сейчас пришлю тебе правила поведения в отряде. Нужно прочитать и сказать, [[м:согласен|ж:согласна]] ты с ними или нет. Если нет, то с чем конкретно.']],
   pts:['Вопрос «с чем не согласен» задаём серьёзно: это последняя возможность обсудить несовпадения до выезда.'],
   why:'Человек, который молча не согласен с правилами, проявит это на поиске — в худший момент.'}
 ];
 
 /* ---------- правила отряда ---------- */
 var RULES_TEXT =
-"Правила поведения в отряде «ЛизаАлерт». Прочитай и скажи, с чем не согласен (или не согласна).\n\n"+
+"Правила поведения в отряде «ЛизаАлерт». Прочитай и скажи, [[м:согласен|ж:согласна]] ты с ними или нет.\n\n"+
 "ДИСЦИПЛИНА\n"+
 "— Старший поисковой группы (СПГ) отвечает за группу. Его распоряжения выполняются без обсуждений на месте. СПГ прошёл обучение, знает алгоритмы поиска и несёт ответственность за качество выполнения задачи перед координатором. Спорные вопросы обсуждают после выезда, на разборе.\n"+
 "— В группе обязательно присутствует хотя бы один мужчина.\n"+
@@ -559,13 +634,13 @@ var MSGS=[
 "Сохрани QR-код себе в телефон картинкой — по нему отмечают на поисках, а связи там может не быть.\n\n"+
 
 "Шаг 3 из 4. Напиши мне тестовое сообщение о готовности — такое же будешь писать на поисках. Сейчас тренировка.\n\n"+
-"Готов\n"+
+"[[м:Готов|ж:Готова]]\n"+
 "Иван Петров (Сокол)\n"+
 "Таганрог\n"+
 "89000000000\n"+
-"Пеший\n"+
+"[[м:Пеший|ж:Пешая]]\n"+
 "РВП: 20:00\n\n"+
-"Подставь свои данные. РВП (расчетное время прибытия) — когда реально приедешь, сейчас поставь любое. «Пеший» значит без машины. Девушкам: «Готова», «Пешая».\n\n"+
+"Подставь свои данные. РВП (расчетное время прибытия) — когда реально приедешь, сейчас поставь любое. [[м:«Пеший»|ж:«Пешая»]] значит без машины.\n\n"+
 "Сохрани своё сообщение, так будет проще откликаться на поиски",
   note:''},
 
@@ -591,8 +666,8 @@ var MSGS=[
   ]},
 
  {t:'Приветствие', n:'после проверки данных', text:
-"Ты принята. Добро пожаловать в отряд «ЛизаАлерт».\n\n"+
-"Ты пришла к нам добровольно, и с этого момента на тебя рассчитывают. От тебя зависит жизнь пропавшего и результат твоих товарищей — если берёшься за дело, делай его добросовестно и вовремя.\n\n"+
+"Ты [[м:принят|ж:принята]]. Добро пожаловать в отряд «ЛизаАлерт».\n\n"+
+"Ты [[м:пришёл|ж:пришла]] к нам добровольно, и с этого момента на тебя рассчитывают. От тебя зависит жизнь пропавшего и результат твоих товарищей — если берёшься за дело, делай его добросовестно и вовремя.\n\n"+
 "Второе: теперь ты часть отряда, и по тебе судят обо всех нас. Личную жизнь никто не контролирует, и твои страницы не обязаны быть официальными. Но не связывай с отрядом откровенные фото, агрессию, кадры с пьянок. Прежде чем поставить атрибутику или назвать себя добровольцем — посмотри на свою страницу глазами человека, который о тебе ничего не знает.\n\n"+
 "В комментариях под постами о поиске не спорим и ничего никому не доказываем. Направления Диванных войск у нас нет.\n\n"+
 "Часто задаваемые вопросы: https://dimarybalkin.github.io/la-recruits/newbie-faq\n"+
@@ -619,12 +694,12 @@ var MSGS=[
 "Про рабочку, чтобы не растеряться в первый раз.\n\n"+
 "На объявленный поиск отвечаешь своим сообщением о готовности — обязательно ОТВЕТНЫМ на запрос, реплаем. Поисков часто идёт несколько параллельно, иначе непонятно, на какой ты откликаешься. Плюс по количеству ответов делают выводы о количестве откликнувшихся.\n\n"+
 "Если ты из Ростова, добавляй также район, так будет проще собираться в экипажи: Ростов-на-Дону, Ворошиловский\n\n"+
-"Вместо «Пеший» ставь своё:\n"+
-"— «Пеший» — если доберешься самостоятельно без машины\n"+
-"— «Пеший, нужен экипаж» — если самостоятельно ты не доберёшься, надо подвезти\n"+
+"Вместо [[м:«Пеший»|ж:«Пешая»]] ставь своё:\n"+
+"— [[м:«Пеший»|ж:«Пешая»]] — если доберешься самостоятельно без машины\n"+
+"— [[м:«Пеший, нужен экипаж»|ж:«Пешая, нужен экипаж»]] — если самостоятельно ты не доберёшься, надо подвезти\n"+
 "— «Авто +4» — если ты на машине и можешь взять четверых человек\n"+
 "— «Авто» — если ты на машине, но взять никого не можешь\n\n"+
-"Если нужен экипаж: найди в чате, кто едет из твоего города или района, напиши ему в личку, договорись, потом исправь своё на «Пеший, в экипаж к такому-то».\n\n"+
+"Если нужен экипаж: найди в чате, кто едет из твоего города или района, напиши ему в личку, договорись, потом исправь своё на [[м:«Пеший, в экипаж к такому-то»|ж:«Пешая, в экипаж к такому-то»]].\n\n"+
 "РВП ставь честное. Вместо времени можешь написать «РВП: к началу работы штаба».\n\n"+
 "По возвращении с поиска обязательно отпишись в рабочке, что ты дома. Иначе искать будут уже тебя",
   note:''},
@@ -686,13 +761,13 @@ var OBJS=[
   ['Понимаю. У нас нет обязательной нормы: люди выезжают, когда могут. Есть те, кто выезжает раз в полгода, и это нормально. Давай просто доведём регистрацию, а участвовать будешь когда сможешь.'],
   ['Это правда, а не уговор: половина тех, кто выезжает сейчас, когда-то делала паузу в три месяца и больше.']],
  ['«У меня нет машины»',
-  ['Это не проблема. Больше половины выезжают без машины — собираются экипажи, тебя заберут и привезут обратно. В сообщении о готовности пишешь «Пеший, нужен экипаж», и дальше договариваешься с тем, кто едет из твоего района.'],
+  ['Это не проблема. Больше половины выезжают без машины — собираются экипажи, тебя заберут и привезут обратно. В сообщении о готовности пишешь [[м:«Пеший, нужен экипаж»|ж:«Пешая, нужен экипаж»]], и дальше договариваешься с тем, кто едет из твоего района.'],
   ['Без машины в отряде остаются 26% против 38% с машиной — именно потому, что люди думают, будто без неё нельзя.']],
  ['«Я боюсь леса» или «я не в той форме»',
   ['В лес идти не обязательно. Половина работы — это город: опросы, расклейка, обход. Плюс есть штаб, прозвон, картография, связь — там физическая форма вообще ни при чём.'],
   ['Никогда не обещаем «там легко»: на поиске бывает тяжело, и честность важнее набора.']],
  ['«Мне ещё нет 18»',
-  ['Спасибо, что написал нам. На поиски в природной среде мы берём только с 18 лет — это жёсткое правило и мы его не обходим. Но ты можешь прийти на встречу для новичков и послушать, а когда исполнится 18 — возвращайся, будем рады.'],
+  ['Спасибо, что [[м:написал|ж:написала]] нам. На поиски в природной среде мы берём только с 18 лет — это жёсткое правило и мы его не обходим. Но ты можешь прийти на встречу для новичков и послушать, а когда исполнится 18 — возвращайся, будем рады.'],
   ['Возраст проверяем по дате рождения и по боту, а не на слух.',
    'Отмечаем в таблице отдельно, чтобы не позвать на выезд по ошибке.',
    'Варианты «а если с родителями» не обсуждаем — это решает не прозвонщик.']],
@@ -893,14 +968,21 @@ renderMsg('#rulesMsg', [{t:'Правила поведения в отряде', 
     b.addEventListener('click',function(){
       document.querySelectorAll('.out').forEach(function(x){ x.setAttribute('aria-pressed','false'); });
       b.setAttribute('aria-pressed','true');
-      ob.className=''; ob.innerHTML=o[2];
+      ob.className=''; ob.innerHTML=o[2]; paintGender(ob);
     });
     box.append(b);
   });
 })();
 
+/* ---------- переключатель обращения ---------- */
+document.querySelectorAll('.gbtn').forEach(function(b){
+  b.addEventListener('click', function(){ setGender(b.getAttribute('data-g')); });
+});
+setGender(getGender(), false);
+
 var toast=$('#toast'), tt;
 function copy(text, btn){
+  text=fill(resolveG(text));
   var ok=function(){
     toast.textContent='Скопировано';
     toast.classList.add('on'); clearTimeout(tt);
